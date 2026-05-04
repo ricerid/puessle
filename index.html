@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>パズルブック解答フォーム</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; line-height: 1.6; }
+        .chapter { border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        input { padding: 8px; width: 200px; }
+        button { padding: 8px 15px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+        .result { margin-top: 10px; font-weight: bold; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+    <h1>パズルブック解答判定</h1>
+    <p>各章の答えを入力してください。</p>
+
+    <div id="forms-container">
+        </div>
+
+    <script>
+        // 【重要】ここに各章の正解を設定してください（小文字・大文字は区別されません）
+        const answers = {
+            1: "apple",
+            2: "たぬき",
+            3: "1234",
+            4: "blue",
+            5: "fire",
+            6: "cloud",
+            7: "dream",
+            8: "finish"
+        };
+
+        const container = document.getElementById('forms-container');
+
+        for (let i = 1; i <= 8; i++) {
+            const section = document.createElement('div');
+            section.className = 'chapter';
+            section.innerHTML = `
+                <h3>第 ${i} 章</h3>
+                <input type="text" id="input-${i}" placeholder="答えを入力">
+                <button onclick="checkAnswer(${i})">判定</button>
+                <div id="result-${i}" class="result"></div>
+            `;
+            container.appendChild(section);
+        }
+
+        function checkAnswer(chapterNum) {
+            const userInput = document.getElementById(`input-${chapterNum}`).value.trim().toLowerCase();
+            const resultDiv = document.getElementById(`result-${chapterNum}`);
+            
+            if (userInput === answers[chapterNum].toLowerCase()) {
+                resultDiv.innerHTML = "<span class='success'>正解！ おめでとうございます。</span>";
+            } else {
+                resultDiv.innerHTML = "<span class='error'>残念、不正解です。</span>";
+            }
+        }
+    </script>
+</body>
+</html>
