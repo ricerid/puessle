@@ -3,62 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>パズルブック解答フォーム</title>
+    <title>Puzzle Solution Portal</title>
     <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; line-height: 1.6; }
-        .chapter { border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        input { padding: 8px; width: 200px; }
-        button { padding: 8px 15px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
-        .result { margin-top: 10px; font-weight: bold; }
-        .success { color: green; }
-        .error { color: red; }
+        /* 基本スタイル */
+        body {
+            margin: 0;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            margin-top: 50px;
+            letter-spacing: 0.2em;
+            font-weight: 300;
+            color: #e0e0e0;
+        }
+
+        /* 8つのボタンが並ぶグリッド */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 横に4つ */
+            gap: 20px;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        /* モバイル対応：画面が狭いときは横2つにする */
+        @media (max-width: 600px) {
+            .grid-container { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .chapter-button {
+            width: 150px;
+            height: 150px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+        }
+
+        .chapter-button:hover {
+            background-color: #333;
+            border-color: #007bff;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .chapter-button span {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        /* オーバーレイ（背面） */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none; /* 初期は非表示 */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        /* モーダルウィンドウ（入力部分） */
+        .modal {
+            background: #2a2a2a;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid #444;
+        }
+
+        .modal h2 { margin-top: 0; }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .submit-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .submit-btn:hover { background: #0056b3; }
+
+        .close-btn {
+            margin-top: 15px;
+            display: block;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* 結果メッセージ */
+        #result-message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <h1>パズルブック解答判定</h1>
-    <p>各章の答えを入力してください。</p>
+    <h1>PUZZLE SOLUTION</h1>
 
-    <div id="forms-container">
+    <div class="grid-container">
+        <button class="chapter-button" onclick="openModal(1)"><span>CHAPTER</span>01</button>
+        <button class="chapter-button" onclick="openModal(2)"><span>CHAPTER</span>02</button>
+        <button class="chapter-button" onclick="openModal(3)"><span>CHAPTER</span>03</button>
+        <button class="chapter-button" onclick="openModal(4)"><span>CHAPTER</span>04</button>
+        <button class="chapter-button" onclick="openModal(5)"><span>CHAPTER</span>05</button>
+        <button class="chapter-button" onclick="openModal(6)"><span>CHAPTER</span>06</button>
+        <button class="chapter-button" onclick="openModal(7)"><span>CHAPTER</span>07</button>
+        <button class="chapter-button" onclick="openModal(8)"><span>CHAPTER</span>08</button>
+    </div>
+
+    <div class="overlay" id="overlay">
+        <div class="modal">
+            <h2 id="modal-title">CHAPTER 01</h2>
+            <p>解答を入力してください</p>
+            <input type="text" id="answer-input" placeholder="ANSWER HERE">
+            <button class="submit-btn" onclick="checkAnswer()">判定する</button>
+            <div id="result-message"></div>
+            <span class="close-btn" onclick="closeModal()">閉じる</span>
         </div>
+    </div>
 
     <script>
-        // 【重要】ここに各章の正解を設定してください（小文字・大文字は区別されません）
-        const answers = {
-            1: "apple",
-            2: "たぬき",
-            3: "1234",
-            4: "blue",
-            5: "fire",
-            6: "cloud",
-            7: "dream",
-            8: "finish"
-        };
+        let activeChapter = 0;
+        const overlay = document.getElementById('overlay');
+        const modalTitle = document.getElementById('modal-title');
+        const answerInput = document.getElementById('answer-input');
+        const resultMessage = document.getElementById('result-message');
 
-        const container = document.getElementById('forms-container');
-
-        for (let i = 1; i <= 8; i++) {
-            const section = document.createElement('div');
-            section.className = 'chapter';
-            section.innerHTML = `
-                <h3>第 ${i} 章</h3>
-                <input type="text" id="input-${i}" placeholder="答えを入力">
-                <button onclick="checkAnswer(${i})">判定</button>
-                <div id="result-${i}" class="result"></div>
-            `;
-            container.appendChild(section);
+        // モーダルを開く
+        function openModal(num) {
+            activeChapter = num;
+            modalTitle.innerText = "CHAPTER 0" + num;
+            answerInput.value = "";
+            resultMessage.innerText = "";
+            overlay.style.display = "flex";
+            answerInput.focus();
         }
 
-        function checkAnswer(chapterNum) {
-            const userInput = document.getElementById(`input-${chapterNum}`).value.trim().toLowerCase();
-            const resultDiv = document.getElementById(`result-${chapterNum}`);
-            
-            if (userInput === answers[chapterNum].toLowerCase()) {
-                resultDiv.innerHTML = "<span class='success'>正解！ おめでとうございます。</span>";
+        // モーダルを閉じる
+        function closeModal() {
+            overlay.style.display = "none";
+        }
+
+        // 正誤判定
+        function checkAnswer() {
+            const val = answerInput.value.trim().toLowerCase();
+            const correctAnswer = "enter"; // すべてenterで統一
+
+            if (val === correctAnswer) {
+                resultMessage.style.color = "#4caf50";
+                resultMessage.innerText = "正解です！";
+                // 1秒後に自動で閉じる
+                setTimeout(closeModal, 1000);
             } else {
-                resultDiv.innerHTML = "<span class='error'>残念、不正解です。</span>";
+                resultMessage.style.color = "#f44336";
+                resultMessage.innerText = "不正解です。";
             }
         }
+
+        // Enterキー対応
+        answerInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") checkAnswer();
+        });
+
+        // 外側をクリックしても閉じる
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
     </script>
+
 </body>
 </html>
